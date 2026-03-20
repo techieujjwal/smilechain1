@@ -14,6 +14,7 @@ import { SmileLeaderboard, SmileMap } from './SmileNetwork';
 import { NOUNS_SVG } from '../constants/nouns';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { mockBlockchain } from '../../lib/mockBlockchain';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -99,7 +100,7 @@ const Navbar = ({ authenticated, login, logout, activeTab, setActiveTab }: any) 
 );
 
 /* ── Result Overlay ── */
-const ResultOverlay = ({ result, onClose }: { result: { score: number, isWinner: boolean } | null, onClose: () => void }) => {
+const ResultOverlay = ({ result, onClose }: { result: { score: number, isWinner: boolean, txHash?: string } | null, onClose: () => void }) => {
   const shareText = result?.isWinner
     ? encodeURIComponent(`Just earned 0.001 USDC with a ${result.score}/5 smile on Proof of Smile 😊✨ @openputer`)
     : '';
@@ -128,8 +129,24 @@ const ResultOverlay = ({ result, onClose }: { result: { score: number, isWinner:
                   <div className="text-4xl font-black bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
                     +0.001 USDC
                   </div>
-                  <div className="text-xs text-gray-400 mt-1">Earned on Base Network</div>
+                  <div className="text-xs text-gray-400 mt-1">Earned on Base Network (Mocked)</div>
                 </div>
+
+                {result.txHash && (
+                  <div className="bg-gray-50 rounded-xl p-3 mb-6 border border-gray-100 flex items-center justify-between group">
+                    <div className="overflow-hidden text-left flex-1 mr-2">
+                       <p className="text-[10px] text-gray-400 font-semibold mb-0.5 uppercase tracking-wider">Transaction Hash</p>
+                       <p className="text-xs text-gray-600 font-mono truncate" title={result.txHash}>{result.txHash}</p>
+                    </div>
+                    <button 
+                      onClick={() => navigator.clipboard.writeText(result.txHash || '')}
+                      className="bg-white border border-gray-200 p-2 rounded-lg text-gray-500 hover:text-gray-900 shadow-sm transition-all hover:scale-105 active:scale-95"
+                      title="Copy transaction hash"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy opacity-70"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    </button>
+                  </div>
+                )}
                 
                 <div className="flex gap-3">
                   <a href={`https://twitter.com/intent/tweet?text=${shareText}`}
@@ -175,7 +192,7 @@ const App = () => {
   const [processedImages] = useState(new Set<string>());
   const [nounsFilterEnabled, setNounsFilterEnabled] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [payoutResult, setPayoutResult] = useState<{ score: number, isWinner: boolean } | null>(null);
+  const [payoutResult, setPayoutResult] = useState<{ score: number, isWinner: boolean, txHash?: string } | null>(null);
   const [activeTab, setActiveTab] = useState('smile');
 
   useGSAP(() => {
@@ -227,33 +244,21 @@ const App = () => {
 
         const signer = updatedProvider.getSigner();
         const c = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        
+        // ==== REAL BLOCKCHAIN LOGIC (Commented for Hackathon Demo) ====
+        /*
         await c.getOracleFee();
         setContract(c);
 
         c.on("SmileAnalysisReceived", async (_reqId: string, photoUrl: string, smileScore: number) => {
-          if (processedImages.has(photoUrl)) return;
-          processedImages.add(photoUrl);
-          const hasWon = smileScore > 3;
-
-          const { data: existing } = await supabase.from('photos').select('id').eq('image_url', photoUrl).maybeSingle();
-          if (!existing) {
-            await supabase.from('photos').insert({
-              user_id: user!.id,
-              image_url: photoUrl,
-              smile_score: smileScore,
-              is_nounish: localStorage.getItem('nounsFilterEnabled') === 'true',
-              smile_count: 0
-            });
-          }
-
-          setImages(prev => prev.map(img =>
-            img.url === photoUrl ? { ...img, isLoading: false, smileScore, hasWon, isNounish: nounsFilterEnabled } : img
-          ));
-          
-          setIsScanning(false);
-          setLoading(false);
-          setPayoutResult({ score: smileScore, isWinner: hasWon });
+          ...
         });
+        */
+        // ================================================================
+        
+        // We set a dummy contract just so the state knows we're "ready"
+        setContract(c);
+        
       } catch (error) {
         console.error('Contract init error:', error);
       }
@@ -311,17 +316,64 @@ const App = () => {
       const provider = await wallets[0].getEthersProvider();
       if ((await provider.getNetwork()).chainId !== BASE_CHAIN_ID) throw new Error('Wrong network');
 
-      const oracleFee = await contract.getOracleFee();
       setImages(prev => [{
         url: result.url, timestamp: new Date().toISOString(),
         isLoading: true, smileCount: 0, smileScore: undefined, hasWon: false, isNounish: nounsFilterEnabled
       }, ...prev]);
 
+      // ==== REAL BLOCKCHAIN LOGIC (Commented for Hackathon Demo) ====
+      /*
       await step('Signing transaction...', 300);
+      const oracleFee = await contract.getOracleFee();
       const tx = await contract.analyzeSmile(result.url, { value: oracleFee, gasLimit: 500000 });
       setUploadStatus('Confirming on-chain...');
       await tx.wait(1);
       setUploadStatus('Awaiting AI verdict... 🤖');
+      */
+      // ================================================================
+
+      // ==== MOCK BLOCKCHAIN LOGIC ====
+      await step('Transaction Pending... (Simulating)', 300);
+      const userAddress = await (await wallets[0].getEthersProvider()).getSigner().getAddress();
+      
+      const mockTx = await mockBlockchain.sendTransaction({
+        from: userAddress,
+        to: CONTRACT_ADDRESS,
+        amount: '0.0005',
+        type: 'analyze_smile'
+      });
+      
+      setUploadStatus('Confirming on-chain...');
+      await mockTx.wait(1);
+      
+      await step('Transaction Successful ✅', 800);
+      setUploadStatus('Awaiting AI verdict... 🤖');
+      await new Promise(r => setTimeout(r, 1200));
+
+      // Simulate backend Oracle response
+      const fakeSmileScore = Math.floor(Math.random() * 2) + 4; // Score 4-5
+      const fakeHasWon = fakeSmileScore > 3;
+
+      // Ensure mock photo is saved to Supabase so it persists
+      const { data: existing } = await supabase.from('photos').select('id').eq('image_url', result.url).maybeSingle();
+      if (!existing && user?.id) {
+        await supabase.from('photos').insert({
+          user_id: user.id,
+          image_url: result.url,
+          smile_score: fakeSmileScore,
+          is_nounish: nounsFilterEnabled,
+          smile_count: 0
+        });
+      }
+
+      setImages(prev => prev.map(img =>
+        img.url === result.url ? { ...img, isLoading: false, smileScore: fakeSmileScore, hasWon: fakeHasWon, isNounish: nounsFilterEnabled } : img
+      ));
+
+      setIsScanning(false);
+      setLoading(false);
+      setPayoutResult({ score: fakeSmileScore, isWinner: fakeHasWon, txHash: mockTx.hash });
+      // ================================================================
     } catch (error: any) {
       console.error('Error:', error);
       setIsScanning(false);

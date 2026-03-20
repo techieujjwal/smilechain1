@@ -7,6 +7,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Modal } from "./ui/modal";
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { mockBlockchain } from '../../lib/mockBlockchain';
 
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const RECIPIENT_ADDRESS = "0xf5526Ff322FBE97c31160A94A380093151Aa442F";
@@ -41,6 +42,8 @@ const GoFundSmiles = ({ wallet }: GoFundSmilesProps) => {
     const fetchBalances = async () => {
       if (!wallet) return;
       try {
+        // ==== REAL BLOCKCHAIN LOGIC ====
+        /*
         const provider = await wallet.getEthersProvider();
         const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
         const decimals = await usdcContract.decimals();
@@ -50,6 +53,12 @@ const GoFundSmiles = ({ wallet }: GoFundSmilesProps) => {
         const userAddress = await signer.getAddress();
         const userBalanceRaw = await usdcContract.balanceOf(userAddress);
         setUserBalance(parseFloat(ethers.utils.formatUnits(userBalanceRaw, decimals)).toFixed(2));
+        */
+
+        // ==== MOCK BLOCKCHAIN LOGIC ====
+        setTotalFunds(mockBlockchain.getMockPoolFunds());
+        setUserBalance(mockBlockchain.getMockUserBalance());
+        
       } catch (error) {
         console.error("Error fetching balances:", error);
       }
@@ -63,6 +72,8 @@ const GoFundSmiles = ({ wallet }: GoFundSmilesProps) => {
     if (!amount || !wallet) return;
     setLoading(true);
     try {
+      // ==== REAL BLOCKCHAIN LOGIC ====
+      /*
       const provider = await wallet.getEthersProvider();
       const signer = provider.getSigner();
       const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
@@ -70,6 +81,24 @@ const GoFundSmiles = ({ wallet }: GoFundSmilesProps) => {
       const parsedAmount = ethers.utils.parseUnits(amount, decimals);
       const tx = await usdcContract.transfer(RECIPIENT_ADDRESS, parsedAmount);
       await tx.wait();
+      */
+
+      // ==== MOCK BLOCKCHAIN LOGIC ====
+      const provider = await wallet.getEthersProvider();
+      const userAddress = await provider.getSigner().getAddress();
+      
+      const mockTx = await mockBlockchain.sendTransaction({
+        from: userAddress,
+        to: RECIPIENT_ADDRESS,
+        amount: amount,
+        type: 'transfer_usdc'
+      });
+      await mockTx.wait(1);
+
+      // Simulate balance updates
+      setUserBalance((prev) => Math.max(0, parseFloat(prev) - parseFloat(amount)).toFixed(2));
+      setTotalFunds((prev) => (parseFloat(prev) + parseFloat(amount)).toFixed(2));
+      
       setAmount("");
       setShowSuccessModal(true);
     } catch (error) {
