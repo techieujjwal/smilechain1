@@ -22,17 +22,38 @@ export const initCamera = async (videoRef: React.RefObject<HTMLVideoElement>) =>
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: 'user',
-        width: { ideal: 480 },
-        height: { ideal: 360 }
+        width: { ideal: 640 },
+        height: { ideal: 480 }
       }
     });
     if (videoRef.current) {
       videoRef.current.srcObject = stream;
       videoRef.current.style.transform = 'scaleX(-1)';
+      try {
+        await videoRef.current.play();
+      } catch (err) {
+        console.warn("Autoplay was prevented:", err);
+      }
     }
+    return stream;
   } catch (err) {
-    console.error("Error accessing camera:", err);
-    alert("Unable to access camera. Please ensure you have granted camera permissions.");
+    console.warn("Could not access camera with ideal constraints, trying fallback...", err);
+    try {
+      const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = fallbackStream;
+        videoRef.current.style.transform = 'scaleX(-1)';
+        try {
+          await videoRef.current.play();
+        } catch (err) {
+          console.warn("Autoplay was prevented:", err);
+        }
+      }
+      return fallbackStream;
+    } catch (fallbackErr) {
+      console.error("Camera fallback failed:", fallbackErr);
+      alert("Unable to access camera. Please check permissions.");
+    }
   }
 };
 

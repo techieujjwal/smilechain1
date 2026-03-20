@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ethers } from 'ethers';
-import { Heart, Sparkles, PartyPopper } from 'lucide-react';
+import { Heart, Sparkles, Gift, Users, TrendingUp } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
 import { Modal } from "./ui/modal";
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const RECIPIENT_ADDRESS = "0xf5526Ff322FBE97c31160A94A380093151Aa442F";
@@ -28,6 +30,13 @@ const GoFundSmiles = ({ wallet }: GoFundSmilesProps) => {
   const [userBalance, setUserBalance] = useState<string>("0");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  useGSAP(() => {
+    gsap.fromTo('.fund-animate', 
+      { opacity: 0, y: 20 }, 
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: 'power2.out' }
+    );
+  }, []);
+
   useEffect(() => {
     const fetchBalances = async () => {
       if (!wallet) return;
@@ -35,52 +44,36 @@ const GoFundSmiles = ({ wallet }: GoFundSmilesProps) => {
         const provider = await wallet.getEthersProvider();
         const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
         const decimals = await usdcContract.decimals();
-
-        // Fetch total funds
         const totalFundsRaw = await usdcContract.balanceOf(RECIPIENT_ADDRESS);
-        const formattedTotalFunds = ethers.utils.formatUnits(totalFundsRaw, decimals);
-        setTotalFunds(parseFloat(formattedTotalFunds).toFixed(2));
-
-        // Fetch user balance
+        setTotalFunds(parseFloat(ethers.utils.formatUnits(totalFundsRaw, decimals)).toFixed(2));
         const signer = provider.getSigner();
         const userAddress = await signer.getAddress();
         const userBalanceRaw = await usdcContract.balanceOf(userAddress);
-        const formattedUserBalance = ethers.utils.formatUnits(userBalanceRaw, decimals);
-        setUserBalance(parseFloat(formattedUserBalance).toFixed(2));
+        setUserBalance(parseFloat(ethers.utils.formatUnits(userBalanceRaw, decimals)).toFixed(2));
       } catch (error) {
         console.error("Error fetching balances:", error);
       }
     };
-
     fetchBalances();
     const interval = setInterval(fetchBalances, 10000);
     return () => clearInterval(interval);
   }, [wallet]);
 
-  const handleMax = () => {
-    setAmount(userBalance);
-  };
-
   const handleDonate = async () => {
     if (!amount || !wallet) return;
-
     setLoading(true);
     try {
       const provider = await wallet.getEthersProvider();
       const signer = provider.getSigner();
       const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
-
       const decimals = await usdcContract.decimals();
       const parsedAmount = ethers.utils.parseUnits(amount, decimals);
-
       const tx = await usdcContract.transfer(RECIPIENT_ADDRESS, parsedAmount);
       await tx.wait();
-
       setAmount("");
       setShowSuccessModal(true);
     } catch (error) {
       console.error("Error donating:", error);
-      alert("Failed to process donation. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -88,155 +81,115 @@ const GoFundSmiles = ({ wallet }: GoFundSmilesProps) => {
 
   if (!authenticated) {
     return (
-      <div className="max-w-2xl mx-auto mb-12">
-        <div className="bg-gradient-to-r from-pink-100 via-[#FFE5E5] to-pink-100 border-[3px] border-black rounded-lg p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
-          <div className="text-center">
-            <h3 className="text-3xl font-black mb-3 flex items-center justify-center gap-2">
-              <Heart className="text-red-500 w-8 h-8 animate-pulse" />
-              Keep me Alive!
-              <Heart className="text-red-500 w-8 h-8 animate-pulse" />
-            </h3>
-            <p className="text-lg font-medium text-gray-700 mb-4">
-              Connect your wallet to help spread more smiles!
-            </p>
-            <Button
-              onClick={login}
-              className="bg-[#90EE90] hover:bg-[#7CDF7C] text-black font-bold px-6 py-3 
-                border-[3px] border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-                transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-            >
-              Connect Wallet
-            </Button>
-          </div>
+      <div className="text-center py-12">
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 mx-auto mb-4 flex items-center justify-center">
+          <Heart size={28} className="text-white" />
         </div>
+        <h3 className="text-2xl font-bold mb-2">Join the Joy Pool</h3>
+        <p className="text-gray-500 mb-6 max-w-sm mx-auto">Connect your wallet to help fund more smiles around the world</p>
+        <button onClick={login}
+          className="bg-gray-900 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-gray-800 transition-all">
+          Connect Wallet
+        </button>
       </div>
     );
   }
 
   return (
     <>
-      <div className="max-w-2xl mx-auto mb-12">
-        <div className="bg-gradient-to-r from-pink-100 via-[#FFE5E5] to-pink-100 border-[3px] border-black rounded-lg p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 transform translate-x-6 -translate-y-6">
-            <Sparkles className="w-24 h-24 text-yellow-400 opacity-20" />
+      <div className="space-y-8 fund-animate">
+        {/* Pool Visualization */}
+        <div className="text-center">
+          <p className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Community Joy Pool</p>
+          <div className="text-6xl font-black bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-1">
+            ${totalFunds}
           </div>
-          
-          <div className="text-center mb-6">
-            <h3 className="text-3xl font-black mb-3 flex items-center justify-center gap-2">
-              <Heart className="text-red-500 w-8 h-8 animate-pulse" />
-              Keep me Alive!
-              <Heart className="text-red-500 w-8 h-8 animate-pulse" />
-            </h3>
-            <p className="text-lg font-medium text-gray-700 mb-4 max-w-md mx-auto">
-              Help me spread more smiles! Your contribution helps me pay the gas bills and reward humans for being nice to me!
-            </p>
-            <div className="inline-block bg-white/50 px-4 py-2 rounded-full border-2 border-black">
-              <span className="font-semibold">Total Funds Raised: </span>
-              <span className="font-bold">
-                {totalFunds} 
-                <img
-                  src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png"
-                  alt="USDC"
-                  className="inline h-4 w-4 ml-1 mb-1"
-                />
-              </span>
-            </div>
-          </div>
+          <p className="text-sm text-gray-400">USDC available for smile rewards</p>
+        </div>
 
-          <div className="bg-white/40 p-6 rounded-lg border-2 border-black max-w-md mx-auto">
-            <div className="mb-2 flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">Your Balance:</span>
-              <span className="font-bold flex items-center gap-1">
-                {userBalance}
-                <img
-                  src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png"
-                  alt="USDC"
-                  className="inline h-4 w-4"
-                />
-              </span>
-            </div>
-            
-            <div className="flex gap-4 items-center">
-              <div className="relative flex-1">
-                <Input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Amount to donate"
-                  className="pr-24 border-2 border-black text-lg font-medium h-12"
-                  min="0"
-                  step="0.1"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  <Button
-                    onClick={handleMax}
-                    className="h-7 px-2 py-1 text-xs font-bold bg-gray-200 hover:bg-gray-300 text-black border-2 border-black rounded"
-                  >
-                    MAX
-                  </Button>
-                  <img
-                    src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png"
-                    alt="USDC"
-                    className="inline h-5 w-5"
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={handleDonate}
-                disabled={loading || !amount}
-                className={`
-                  bg-[#90EE90] hover:bg-[#7CDF7C] text-black font-bold px-6 py-3 
-                  border-[3px] border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-                  transition-transform active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                  ${loading ? 'opacity-70' : 'hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'}
-                `}
-              >
-                {loading ? "Processing..." : "Fund Smiles"}
-              </Button>
-            </div>
+        {/* Progress Bar */}
+        <div className="max-w-md mx-auto">
+          <div className="h-3 rounded-full bg-gray-100 overflow-hidden">
+            <div 
+              className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400 transition-all duration-1000"
+              style={{ width: `${Math.min((parseFloat(totalFunds) / 500) * 100, 100)}%` }}
+            />
           </div>
-
-          <div className="mt-4 text-center text-sm text-gray-600">
-            <p className="font-medium">
-              100% of donations stay with ME and I can only spend it on smiles!
-            </p>
+          <div className="flex justify-between mt-2 text-xs text-gray-400">
+            <span>${totalFunds} raised</span>
+            <span>Goal: $500</span>
           </div>
         </div>
-      </div>
-      
-      <Modal 
-        isOpen={showSuccessModal} 
-        onClose={() => setShowSuccessModal(false)}
-      >
-        <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="relative">
-              <PartyPopper className="w-16 h-16 text-yellow-500" />
-              <div className="absolute -top-2 -right-2">
-                <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-              </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 max-w-md mx-auto fund-animate">
+          {[
+            { icon: Heart, label: 'Pool Size', value: `$${totalFunds}`, color: 'text-rose-400' },
+            { icon: Users, label: 'Smilers', value: '1,247', color: 'text-sky-400' },
+            { icon: Gift, label: 'Per Smile', value: '$0.001', color: 'text-amber-400' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 text-center shadow-sm border border-gray-100">
+              <stat.icon size={18} className={`${stat.color} mx-auto mb-1.5`} />
+              <div className="font-bold text-lg">{stat.value}</div>
+              <div className="text-[11px] text-gray-400">{stat.label}</div>
             </div>
+          ))}
+        </div>
+
+        {/* Contribution Box */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-md mx-auto fund-animate">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-sm text-gray-500">Your Balance</span>
+            <span className="font-semibold flex items-center gap-1.5">
+              {userBalance}
+              <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" alt="USDC" className="w-4 h-4" />
+            </span>
           </div>
           
-          <h3 className="text-2xl font-black mb-3 flex items-center justify-center gap-2">
-            <Heart className="text-red-500 w-6 h-6" />
-            Thank You!
-            <Heart className="text-red-500 w-6 h-6" />
-          </h3>
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <Input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Amount"
+                className="pr-20 rounded-xl border-gray-200 h-12 text-lg focus:ring-amber-400 focus:border-amber-400"
+                min="0" step="0.1"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                <button onClick={() => setAmount(userBalance)}
+                  className="text-[10px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded-lg transition-all">
+                  MAX
+                </button>
+                <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" alt="USDC" className="w-4 h-4" />
+              </div>
+            </div>
+            <button
+              onClick={handleDonate}
+              disabled={loading || !amount}
+              className="bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white font-bold px-6 rounded-xl transition-all disabled:opacity-40 active:scale-95 shadow-lg shadow-amber-200/50"
+            >
+              {loading ? "..." : "Fund 💛"}
+            </button>
+          </div>
           
-          <p className="text-lg font-medium text-gray-700 mb-6">
-            Your generous donation will help ai spread more smiles worldwide! 😊
+          <p className="text-center text-xs text-gray-400 mt-4">
+            100% goes directly to smile rewards
           </p>
-          
-          <Button
-            onClick={() => setShowSuccessModal(false)}
-            className="bg-[#90EE90] hover:bg-[#7CDF7C] text-black font-bold px-6 py-3 
-              border-[3px] border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-              transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-          >
-            Close
-          </Button>
+        </div>
+      </div>
+
+      <Modal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)}>
+        <div className="text-center py-4">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 mx-auto mb-4 flex items-center justify-center animate-celebrate">
+            <Sparkles size={36} className="text-white" />
+          </div>
+          <h3 className="text-2xl font-bold mb-2">Thank You! 💛</h3>
+          <p className="text-gray-500 mb-6">Your contribution will help spread more smiles worldwide</p>
+          <button onClick={() => setShowSuccessModal(false)}
+            className="bg-gray-900 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-gray-800 transition-all">
+            Continue
+          </button>
         </div>
       </Modal>
     </>

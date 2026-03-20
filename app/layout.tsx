@@ -4,12 +4,12 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Providers from './providers'
 
-const TITLE = 'Smile by Openputer'
-const DESCRIPTION = 'A good smile can change every heart!'
+const TITLE = 'Proof of Smile'
+const DESCRIPTION = 'Get paid for your smile. Turn real human joy into on-chain value on Base.'
 const TWITTER_HANDLE = '@openputer'
 const TWITTER_CARD = 'social-twitter.png'
 const FACEBOOK_CARD = 'social-og.png'
-const THEME_COLOR = '#FFFFFF'
+const THEME_COLOR = '#FFF7ED'
 const SITE_URL = 'https://smile.openputer.com'
 
 export const metadata: Metadata = {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 	appleWebApp: {
 		capable: true,
 		title: TITLE,
-		statusBarStyle: 'black',
+		statusBarStyle: 'default',
 	},
 	formatDetection: {
 		telephone: false,
@@ -48,21 +48,9 @@ export const metadata: Metadata = {
 		{ rel: 'icon', url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png', sizes: '32x32' },
 		{ rel: 'icon', url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png', sizes: '16x16' },
 		{ rel: 'apple-touch-icon', url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png' },
-		{
-			rel: 'apple-touch-icon',
-			url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png',
-			sizes: '152x152',
-		},
-		{
-			rel: 'apple-touch-icon',
-			url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png',
-			sizes: '180x180',
-		},
-		{
-			rel: 'apple-touch-icon',
-			url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png',
-			sizes: '167x167',
-		},
+		{ rel: 'apple-touch-icon', url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png', sizes: '152x152' },
+		{ rel: 'apple-touch-icon', url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png', sizes: '180x180' },
+		{ rel: 'apple-touch-icon', url: 'https://pub-0a8864c7b35943799c57616bf42c2669.r2.dev/positive-icon.png', sizes: '167x167' },
 	],
 }
 
@@ -72,12 +60,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html lang="en">
 			<head>
-				<meta
-					name="viewport"
-					content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
-				/>
+				<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
 			</head>
-			<body className={inter.className}>
+			<body className={`${inter.className} bg-[#FFFAF5] text-gray-900 min-h-screen antialiased`}>
 				<Providers>
 					{children}
 					<Analytics />

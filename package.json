@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@firebase/firestore": "^4.3.2",
+    "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^3.9.0",
     "@privy-io/react-auth": "^1.94.2",
     "@radix-ui/react-accordion": "^1.2.0",
@@ -59,6 +60,8 @@
     "embla-carousel-react": "^8.2.0",
     "face-api.js": "^0.22.2",
     "firebase": "^10.6.0",
+    "framer-motion": "^12.38.0",
+    "gsap": "^3.14.2",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.2.4",
     "js-beautify": "^1.14.11",
