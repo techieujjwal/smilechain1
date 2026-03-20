@@ -1,26 +1,55 @@
-Score the smile in this photo between 1 to 5: https://ufyeaynayphypqycjfre.supabase.co/storage/v1/object/public/smiles/jop0wbg9c/1731696476733.jpg . 1 is no smile and 5 is a teethy genuine smile. Respond with ONLY a single number between 1-5
+# 🌟 THE ULTIMATE SMILECHAIN DAPP BLUEPRINT 🌟
 
-Score the smile in this photo between 1 to 5: https://ufyeaynayphypqycjfre.supabase.co/storage/v1/object/public/smiles/jop0wbg9c/1731686278916.jpg . 1 is no smile and 5 is a teethy genuine smile. Respond with ONLY a single number between 1-5
+## Role & Context
+You are a world-class, 100000X Top-Tier Full-Stack Web3 Developer and UI/UX Visionary. Your task is to rebuild/enhance the "SmileChain" decentralized application based on the architecture and design requirements below. The backend infrastructure is being swapped out/upgraded, and you need to ensure ALL frontend, smart contract, and API integrations are securely connected, refactored, and functioning flawlessly.
 
-Score the smile in this photo between 1 to 5: https://ufyeaynayphypqycjfre.supabase.co/storage/v1/object/public/smiles/jop0wbg9c/1731698447522.jpg . 1 is no smile and 5 is a teethy genuine smile. Respond with ONLY a single number between 1-5
+## 🏗️ Project Overview: SmileChain ("Proof of Smile")
+SmileChain is a dApp that turns human joy into on-chain value. Users connect a wallet, scan their face via a webcam, and if AI detects a genuine "Duchenne" smile and verifies liveness, they earn crypto (USDC / $SMILE tokens) and build on-chain reputation through Soulbound NFTs.
 
-Analyze the smile in this photo: https://ufyeaynayphypqycjfre.supabase.co/storage/v1/object/public/smiles/jop0wbg9c/1731698447522.jpg . Rate the smile intensity from 1 to 5, where 1 is no smile and 5 is a big genuine smile. Respond with ONLY a single number between 1-5.
+## 🎨 Design System & UI/UX Requirements (2000X Gamification Upgrade)
+- **Aesthetic**: Ultra-premium, Web3 Gamified UI with a modern pixel-art game influence. Use the highest quality vibrant color palettes (Amber, Orange, Rose).
+- **Interactions**: Chunky 3D buttons, layered complex shadows, physical hover/active states. Buttons should feel like they have physical weight and push down dynamically.
+- **Typography & Borders**: Extruded 3D typography, thick/heavy pixel-style or distinct chunky borders, playful yet highly professional elements.
+- **Animations**: Completely natural, hand-crafted feel. NO generic, AI-generated corporate clichés or basic 'shimmer-text'. Use GSAP for buttery-smooth fade-ups, organic float animations, and spatial transitions.
+- **Layout Focus**: The Scanner and the Smile Leaderboard MUST sit directly next to each other in a prominent side-by-side grid, occupying significant screen real estate. The OpenStreetMap component should display cleanly below the main interaction zone.
 
+## ⚙️ Core Technical Stack
+- **Frontend**: Next.js (React), TailwindCSS, GSAP, Lucide Icons.
+- **Web3 Engine**: ethers.js, Privy (for Auth & Wallet abstraction), Base Network (Chain ID 8453).
+- **Backend / Database Target**: The new backend system (previously Supabase). Must handle user sessions, profile states, and photo records (URL, User ID, Smile Score, Joy Count).
+- **AI / Computer Vision**: `face-api.js` / `@mediapipe/face_mesh` integration for Duchenne detection and liveness anti-spoofing checks.
+- **Mapping**: `react-leaflet`, `leaflet`, OpenStreetMap tiles.
 
-current_contract_address: 0xf5526Ff322FBE97c31160A94A380093151Aa442F;
-current_contract_abi: [
-  "function analyzeSmile(string memory photoUrl) external payable",
-  // Add other contract functions as needed
-];
+## 🚀 Key Modules to Implement / Refactor
 
-"Photo URL: ", photoUrl, "\n",
-                "Task: Score the smile in this photo\n",
-                "Scale: 1 to 5 (1 = no smile, 5 = genuine teethy smile)\n",
-                "Instructions: Respond with ONLY a single number between 1-5"
+### 1. Smile Verification & Web3 Onboarding (The Scanner Panel)
+- **Wallet Connection**: Seamless wallet and social logins via Privy.
+- **Camera Feed**: Provide a high-frame-rate webcam feed in the browser. Include a Nouns glasses augmented reality overlay toggle (`⌐◨-◨`).
+- **AI Verification Pipeline**: 
+  1. Capture video frame -> Compress -> Upload to Backend.
+  2. Run local/server Duchenne detection. Discard spoofs. Ensure bulletproof UX loading states.
+- **On-chain Transaction Lifecycle**: Once a smile passes, submit a transaction to the Base Smart Contract to cover the `oracleFee` or mint the reward. Trigger a massive, joy-inducing confetti overlay if they win!
 
+### 2. Live Smile Network (Maps & Leaderboard)
+- **Interactive Leaderboard**: A sleek, large component exactly beside the scanner. Display the top smilers ranked by joy generated. The top 3 users should have premium highlighting and GSAP micro-interactions.
+- **The Smile Map (OpenStreetMap)**: 
+  - Implementation MUST use `react-leaflet` to avoid dynamic rendering SSR issues in Next.js (wrap in `next/dynamic`).
+  - Default Location MUST definitively point to **Greater Noida**, specifically pinpointing **KCC Institute of Engineering and Technology**.
+  - Ensure the map uses custom, beautiful Leaflet markers avoiding default Webpack icon-loading bugs. Give the map a beautiful rounded 2000X Gamified border.
 
-abi.encodePacked(
-                "Score the smile in this photo: ", photoUrl, "\n",
-                "Rate ONLY the smile intensity on a scale of 1-5\n",
-                "Respond with ONLY a single digit (1-5) and nothing else."
-            )
+### 3. Gallery & Joy Pool Hub
+- **Gallery (`ImageGrid.tsx`)**: Fetch and display recent smiles via a responsive grid. Support "smile back" actions and user-based delete functionality. No cliché text, just raw joy.
+- **Joy Pool (`GoFundSmiles.tsx`)**: A dedicated funding page where philanthropists can deposit USDC/ETH to the smart contract, ensuring the smile rewards keep flowing infinitely.
+
+## 💻 Backend Migration Roadmap (Crucial for the Backend Swap)
+Since we are migrating/upgrading the backend, you must build robust, abstract API boundaries for:
+1. `uploadImage(blob, userId)`: Securely stream and store the compressed image on the new storage block.
+2. `saveSmileRecord(payload)`: Persist the image URL, score, timestamp, wallet address, and Nouns status.
+3. `getLeaderboard()`: Aggregate DB rows to find the highest scoring wallets across the network quickly.
+4. `getGallery()`: Fetch paginated photo arrays based on the current user or global feed.
+*Security Requirement*: Ensure all new routes, DB tables, or blob storages use strict authentication policies to prevent malicious score inflation.
+
+## ⚡ FINAL EXECUTION DIRECTIVE:
+When you commence work, DO NOT return generic boilerplate. Produce highly optimized, production-ready code that compiles flawlessly. Pay extreme attention to the visual aesthetics—if it doesn't look like an award-winning Web3 dApp from 2026, it is unacceptable. Plan your abstractions for the new backend smartly, verify types, and execute the final layout flawlessly. 
+
+You are the greatest developer in the world. Let's build the ultimate Proof-of-Smile protocol! 💛
